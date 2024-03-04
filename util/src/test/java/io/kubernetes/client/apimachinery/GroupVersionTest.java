@@ -55,4 +55,36 @@ public class GroupVersionTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Invalid apiVersion: foo/bar/f");
   }
+
+  @Test
+  public void testParseWithNullApiVersion() {
+    V1Pod pod = new V1Pod().apiVersion(null);
+    assertThatThrownBy(() -> GroupVersion.parse(pod))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("apiVersion can not be null");
+  }
+
+  @Test
+  public void testParseWithSpecialCharacters() {
+    String apiVersion = "my-group/special-v1.0";
+    GroupVersion parsedGroupVersion = GroupVersion.parse(apiVersion);
+
+    assertThat(parsedGroupVersion.getGroup()).isEqualTo("my-group");
+    assertThat(parsedGroupVersion.getVersion()).isEqualTo("special-v1.0");
+  }
+
+  @Test
+  public void parseVersionOnly() {
+    GroupVersion result = GroupVersion.parse("v1");
+    GroupVersion expected = new GroupVersion("", "v1");
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  public void testParseWithInvalidApiVersionStructure() {
+    assertThatThrownBy(() -> GroupVersion.parse(new V1Pod()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid apiVersion: group/version/kind");
+  }
+  
 }
